@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import tkinter.messagebox as messagebox
 from threading import Thread
 from queue import Queue
 from transformers import pipeline
@@ -40,6 +41,7 @@ def translate_text():
             root.after(100, update_output_area)
         else:
             output_area.config(state=tk.DISABLED)
+            messagebox.showinfo("FuguMT 英日翻訳", "翻訳が完了しました！")
 
     # 100msごとにキューをチェックしてGUIを更新
     root.after(100, update_output_area)
@@ -50,19 +52,36 @@ root = tk.Tk()
 root.title("FuguMT 英日翻訳")
 root.geometry("500x500")
 
+# 日本語の入力エリア
 input_label = ttk.Label(root, text="翻訳したい文章 (en)")
 input_label.pack(padx=10, pady=10)
 
-text_area = tk.Text(root, wrap=tk.WORD, height=12, width=60)
-text_area.pack(padx=10, pady=10)
+input_frame = tk.Frame(root)
+input_frame.pack(padx=10, pady=10)
 
+text_area = tk.Text(input_frame, wrap=tk.WORD, height=12, width=60)
+text_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+input_scrollbar = tk.Scrollbar(input_frame, command=text_area.yview)
+input_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+text_area.config(yscrollcommand=input_scrollbar.set)
+
+# 翻訳ボタン
 translate_button = ttk.Button(root, text="翻訳", command=translate_text)
 translate_button.pack(pady=10)
 
+# 翻訳結果の出力エリア
 output_label = ttk.Label(root, text="翻訳結果 (ja)")
 output_label.pack(padx=10, pady=10)
 
-output_area = tk.Text(root, wrap=tk.WORD, height=12, width=60, state=tk.DISABLED)
-output_area.pack(padx=10, pady=10)
+output_frame = tk.Frame(root)
+output_frame.pack(padx=10, pady=10)
+
+output_area = tk.Text(output_frame, wrap=tk.WORD, height=12, width=60, state=tk.DISABLED)
+output_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+output_scrollbar = tk.Scrollbar(output_frame, command=output_area.yview)
+output_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+output_area.config(yscrollcommand=output_scrollbar.set)
 
 root.mainloop()
