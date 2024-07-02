@@ -8,25 +8,20 @@ ej_translator = pipeline("translation", model="staka/fugumt-en-ja", device=0)
 
 def translate_text():
     input_text = text_area.get("1.0", tk.END).strip()
-    input_lines = input_text.split("\n")
-
-    # 改行のインデックスと翻訳対象のテキストを抽出
-    newline_indices = [index for index, line in enumerate(input_lines) if not line]
-    sentences_to_translate = [line for line in input_lines if line]
-
-    # 翻訳を実行し、改行だけの行を元のインデックスに挿入
-    translated_results = ej_translator(sentences_to_translate)
-    translated_text_list = [result['translation_text'] for result in translated_results]
-
-    for index in newline_indices:
-        translated_text_list.insert(index, '')
-
-    output_text = "\n".join(translated_text_list)
 
     # ウィンドウに翻訳結果を表示
     output_area.config(state=tk.NORMAL)
     output_area.delete("1.0", tk.END)
-    output_area.insert(tk.END, output_text)
+
+    for input_sentence in input_text.split("\n"):
+        # 空行を除いて1行ごとに翻訳
+        if input_sentence:
+            result = ej_translator(input_sentence)
+            translated_text = str(result).replace("[{'translation_text': '", "").replace("'}]", "")
+            output_area.insert(tk.END, translated_text + "\n")
+        else:
+            output_area.insert(tk.END, "\n")
+
     output_area.config(state=tk.DISABLED)
 
 
