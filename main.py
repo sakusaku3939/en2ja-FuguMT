@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from threading import Thread
+from queue import Queue
 from transformers import pipeline
 
 print("読み込み中...")
@@ -7,22 +9,40 @@ ej_translator = pipeline("translation", model="staka/fugumt-en-ja", device=0)
 
 
 def translate_text():
-    input_text = text_area.get("1.0", tk.END).strip()
-
-    # ウィンドウに翻訳結果を表示
     output_area.config(state=tk.NORMAL)
     output_area.delete("1.0", tk.END)
 
-    for input_sentence in input_text.split("\n"):
-        # 空行を除いて1行ごとに翻訳
-        if input_sentence:
-            result = ej_translator(input_sentence)
-            translated_text = str(result).replace("[{'translation_text': '", "").replace("'}]", "")
-            output_area.insert(tk.END, translated_text + "\n")
-        else:
-            output_area.insert(tk.END, "\n")
+    def translate_line_by_line(queue):
+        input_text = text_area.get("1.0", tk.END).strip()
 
-    output_area.config(state=tk.DISABLED)
+        # 空行を除いて1行ごとに翻訳
+        for input_sentence in input_text.split("\n"):
+            if input_sentence:
+                result = ej_translator(input_sentence)
+                translated_text = str(result).replace("[{'translation_text': '", "").replace("'}]", "")
+                queue.put(translated_text)
+            else:
+                queue.put("")
+
+    # スレッドを作成して翻訳処理をバックグラウンドで実行
+    translation_queue = Queue()
+    translation_thread = Thread(target=translate_line_by_line, args=(translation_queue,))
+    translation_thread.start()
+
+    def update_output_area():
+        # キューから翻訳結果を取得してGUIに表示
+        while not translation_queue.empty():
+            translated_text = translation_queue.get_nowait()
+            output_area.insert(tk.END, translated_text + "\n")
+
+        # スレッドがまだ生きている場合、再度キューのチェックを行う
+        if translation_thread.is_alive():
+            root.after(100, update_output_area)
+        else:
+            output_area.config(state=tk.DISABLED)
+
+    # 100msごとにキューをチェックしてGUIを更新
+    root.after(100, update_output_area)
 
 
 # GUIレイアウト設定
