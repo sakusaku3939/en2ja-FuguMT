@@ -1,6 +1,6 @@
 import tkinter as tk
+import winsound
 from tkinter import ttk
-import tkinter.messagebox as messagebox
 from threading import Thread
 from queue import Queue
 from transformers import pipeline
@@ -12,6 +12,7 @@ ej_translator = pipeline("translation", model="staka/fugumt-en-ja", device=0)
 def translate_text():
     output_area.config(state=tk.NORMAL)
     output_area.delete("1.0", tk.END)
+    translate_button.config(state=tk.DISABLED)
 
     def translate_line_by_line(queue):
         input_text = text_area.get("1.0", tk.END).strip()
@@ -41,7 +42,8 @@ def translate_text():
             root.after(100, update_output_area)
         else:
             output_area.config(state=tk.DISABLED)
-            messagebox.showinfo("FuguMT 英日翻訳", "翻訳が完了しました！")
+            translate_button.config(state=tk.NORMAL)
+            winsound.MessageBeep(winsound.MB_OK)  # 完了音を鳴らす
 
     # 100msごとにキューをチェックしてGUIを更新
     root.after(100, update_output_area)

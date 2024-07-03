@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.11 (FuguMT-en2ja)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (FuguMT-en2ja)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (en2ja-FuguMT)" project-jdk-type="Python SDK" />
 </project>
