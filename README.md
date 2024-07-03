@@ -6,7 +6,7 @@
 
 ### 1. 環境構築
 ```
-pip install transformers==4.26.1
+pip install transformers==4.30.2
 pip install sentencepiece sacremoses
 pip install torch -f https://download.pytorch.org/whl/torch_stable.html
 ```
