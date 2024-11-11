@@ -16,13 +16,27 @@ def translate_text():
 
     def translate_line_by_line(queue):
         input_text = text_area.get("1.0", tk.END).strip()
+        max_length = 512
 
         # 空行を除いて1行ごとに翻訳
         for input_sentence in input_text.split("\n"):
             if input_sentence:
-                result = ej_translator(input_sentence)
-                translated_text = str(result).replace("[{'translation_text': '", "").replace("'}]", "")
-                queue.put(translated_text)
+                # 文を最大長以下に分割
+                sentences = [input_sentence[i:i + max_length] for i in range(0, len(input_sentence), max_length)]
+                translated_result = []
+
+                # 分割した各文を翻訳し、結果を結合
+                for sentence in sentences:
+                    try:
+                        result = ej_translator(sentence)
+                        translated_text = str(result).replace("[{'translation_text': '", "").replace("'}]", "")
+                        translated_result.append(translated_text)
+                    except Exception as e:
+                        queue.put(f"Error translating sentence: {e}")
+                        return
+
+                # 結合した翻訳結果をキューに追加
+                queue.put(" ".join(translated_result))
             else:
                 queue.put("")
 
